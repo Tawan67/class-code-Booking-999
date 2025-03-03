@@ -1,3 +1,8 @@
+import math
+from datetime import datetime
+from dateutil.relativedelta import relativedelta  # to add a mount in period
+
+
 class ControlSystem:
     def __init__(self):
         self.__booking_list = []
@@ -27,7 +32,93 @@ class ControlSystem:
         self.__paymentmethod = input1
         return "Success"
 
-    def search_member_by_id(self, user_id):
+    def search_accom_by_id(self, accom_id):  # 1
+        for i in self.__accommodation_list:
+            if i.get_id == accom_id:
+                return i
+        return "Not Found"
+        pass
+
+    def create_booking(self, date, guest_amount, accom_id, price, menber_id):
+        member = self.search_member_by_id(menber_id)
+        accom = self.search_accom_by_id(accom_id)
+        booking_item = Booking(accom=accom, date=date,
+                               guess=guest_amount, member=member, amount=price)
+        self.add_booking(booking_item)
+        pass
+
+    def create_account(self, name: str, email: str, password: str, phone: str, age: int):
+        acount = Member(name=name, email=email,
+                        password=password, phone_num=phone, age=age)
+        self.add_member(acount)
+        pass
+
+    def cal_price_in_accom(self, accom_id, guest, start_date, end_date):
+        accom = self.search_accom_by_id(accom_id=accom_id)
+        price = accom.cal_price(guest, start_date, end_date)
+        return price
+
+        pass  # call func in Accomodation to cal total price
+
+    def search_user_to_check(self, user_name, phone, email, password, age):
+        for member in self.__member_list:
+            if member.get_phone_num == phone and member.get_user_nane == user_name and member.get_email == email:
+                return "You have an Account, Wanna Login?"
+        try:
+            self.create_account(name=user_name, email=email,
+                                password=password, age=age)
+            return "Success"
+        except:
+            return "Sign up Fail"
+        pass  # search for check if user want to sign up
+
+    def search_coupon_by_user_id(self, user_id):
+        user = self.search_member_by_id(user_id)
+        coupons = user.get_coupons
+        result = self.show_coupon(coupons)
+        return result
+
+    def show_coupon(self, coupons):
+        result = []
+        for cou in coupons:
+            if cou.check_expirat():
+                result.append(cou.get_info())
+        return result
+        # for show all coupon on UI
+        pass
+
+    def create_payment(self, price, period, paymed, booking_id):
+        booking_item = self.search_booking_by_id(booking_id=booking_id)
+        payment = booking_item.create_payment(price, period, paymed)
+        result = self.update_booking_pay(payment)
+        return result
+        pass  # call Booking to create
+
+    def create_payment_med(self, details):
+        details = "".join(i for i in details if i != '"')
+        card_id, user, balance, password = details.split(",")
+        balance = int(balance)
+        user = self.search_member_by_id(user)
+        pay_med = Debit(card_id, user, balance, password)
+        return pay_med
+        # key use
+        # cal member to create and put on Booking after create
+        pass
+
+    def update_booking_payment(self, booking_id, payment):
+        booking = self.search_booking_by_id(booking_id=booking_id)
+        result = booking.update_payment(payment)
+        # to put payment and pay_med into Booking
+        pass
+
+    def update_booking_pay_med(self, booking_id, paymed):
+        booking = self.search_booking_by_id(booking_id=booking_id)
+        result = booking.update_pay_med(paymed)
+        return result
+        pass
+# update
+
+    def search_member_by_id(self, id):
         for member in self.get_member_list:
             if id == member.get_user_id:
                 return member, id
@@ -291,13 +382,7 @@ class Admin(User):
 class Accommodation:
     count_id = 1
 
-<<<<<<< HEAD
     def __init__(self, name, address, info, price):
-=======
-    def __init__(self, name, info, address):
-        self.__name = name
-        self.__info = info
->>>>>>> main
         self.__id = Accommodation.count_id
         self.__accom_name = name
         self.__address = address
@@ -316,7 +401,6 @@ class Accommodation:
         self.__status = True
         return "Success"
 
-<<<<<<< HEAD
     def add_review(self, review):
         if isinstance(review, Review):
             self.__reviews.append(review)
@@ -352,7 +436,7 @@ class Accommodation:
     def get_review(self, Accommodation):
 
         pass
-=======
+
     def del_booked_date(self, target):
         if not isinstance(target, Booked_date):
             return "Error"
@@ -366,7 +450,6 @@ class Accommodation:
     @property
     def get_info(self):
         return self.__info
->>>>>>> main
 
     @property
     def get_id(self):
@@ -384,7 +467,6 @@ class Accommodation:
     def get_accom_pics(self):
         return self.__accom_pics
 
-<<<<<<< HEAD
     @property
     def get_info(self):
         return self.__info
@@ -397,8 +479,6 @@ class Accommodation:
     def get_price(self):
         return self.__price
 
-=======
->>>>>>> main
 
 class House(Accommodation):
     def __init__(self, name, address, price):
@@ -412,13 +492,8 @@ class House(Accommodation):
 
 
 class Hotel(Accommodation):
-<<<<<<< HEAD
-    def __init__(self, name, address):
-        super().__init__(name, address, "Hotel Info", 0)
-=======
     def __init__(self, name, info, address):
         super().__init__(name, info, address)
->>>>>>> main
         self.__rooms = []
 
     def add_room(self, room):
@@ -428,13 +503,10 @@ class Hotel(Accommodation):
             self.__rooms.append(room)
             return "Success"
 
-<<<<<<< HEAD
     @property
     def get_rooms(self):
         return self.__rooms
 
-=======
->>>>>>> main
 
 class Room(Accommodation):
     def __init__(self, name, address, room_id, room_floor, price):
@@ -443,7 +515,6 @@ class Room(Accommodation):
         self.__room_floor = room_floor
         self.__price_per_day = price
         self.__calendar = []
-<<<<<<< HEAD
 
     @property
     def get_room_price(self):
@@ -479,8 +550,6 @@ class Review:
     @property
     def get_message(self):
         return self.__message
-=======
->>>>>>> main
 
 
 class Booking:
@@ -490,10 +559,7 @@ class Booking:
         self.__booking_id = Booking.count
         self.__accommodation = accom
         # self.__date = date วันที่ทำรายการจอง
-<<<<<<< HEAD
-=======
         self.__booked_date = None
->>>>>>> main
         self.__date = date
         self.__amount = 0  # ราคาที่ต้องจ่าย
         self.__guess_amount = guess
@@ -545,19 +611,9 @@ class Booking:
     def get_amount(self):
         return self.__amount
 
-<<<<<<< HEAD
     def discount_by_coupon(self):
         pass
 
-
-class Payment:
-    """
-    self.__status = False =====
-    self.__periods = period =====  ก้อนหลายๆ ที่ต้องจ่าย
-    self.__pay_med = pay_med ===== ช่องทางการจ่าย
-    self.__pay_id = id ===== ไอดีไว้หา Payment
-    """
-=======
     @property
     def get_guess_amount(self):
         return self.__guess_amount
@@ -605,13 +661,12 @@ class Booked_date:
 
 
 class Payment:
-    '''
-        self.__status = False =====
-        self.__periods = period =====  ก้อนหลายๆ ที่ต้องจ่าย
-        self.__pay_med = pay_med ===== ช่องทางการจ่าย
-        self.__pay_id = id ===== ไอดีไว้หา Payment
-    '''
->>>>>>> main
+    """
+    self.__status = False =====
+    self.__periods = period =====  ก้อนหลายๆ ที่ต้องจ่าย
+    self.__pay_med = pay_med ===== ช่องทางการจ่าย
+    self.__pay_id = id ===== ไอดีไว้หา Payment
+    """
 
     def __init__(self, period, pay_med, id):
         self.__status = False
@@ -626,11 +681,7 @@ class Payment:
     def pay_time(self):
         pass
 
-<<<<<<< HEAD
     """
-=======
-    '''
->>>>>>> main
         self.__status = False ===== ก้อนนี้จ่ายยัง
         self.__price = price ===== เงินที่ต้องจ่ายต่อรอบ
         self.__date = date ===== วันที่ต้องหักเงิน
@@ -668,7 +719,6 @@ class PaymentMethod:
     def pay(self, pray_tang):
         pass
 
-<<<<<<< HEAD
 
 class BookingDate:
     def __init__(self, user, checkin_date, checkout_date):
@@ -689,8 +739,6 @@ class BookingDate:
 
     def cal_date_period(self):
         pass
-=======
->>>>>>> main
 
     pass
 
@@ -718,7 +766,6 @@ class Debit(Card):
         super().__init__(bank_id, user, balance, password)
 
     pass
-<<<<<<< HEAD
 
 
 controlsystem = ControlSystem()
@@ -745,5 +792,3 @@ print()
 print(home1.get_id, home1.get_acc_name, home1.get_address, home1.get_price)
 print(home2.get_id, home2.get_acc_name, home2.get_address, home2.get_price)
 print(home3.get_id, home3.get_acc_name, home3.get_address, home3.get_price)
-=======
->>>>>>> main
