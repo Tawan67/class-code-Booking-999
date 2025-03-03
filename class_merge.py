@@ -32,6 +32,92 @@ class ControlSystem:
         self.__paymentmethod = input1
         return "Success"
 
+    def search_accom_by_id(self, accom_id):  # 1
+        for i in self.__accommodation_list:
+            if i.get_id == accom_id:
+                return i
+        return "Not Found"
+        pass
+
+    def create_booking(self, date, guest_amount, accom_id, price, menber_id):
+        member = self.search_member_by_id(menber_id)
+        accom = self.search_accom_by_id(accom_id)
+        booking_item = Booking(accom=accom, date=date,
+                               guess=guest_amount, member=member, amount=price)
+        self.add_booking(booking_item)
+        pass
+
+    def create_account(self, name: str, email: str, password: str, phone: str, age: int):
+        acount = Member(name=name, email=email,
+                        password=password, phone_num=phone, age=age)
+        self.add_member(acount)
+        pass
+
+    def cal_price_in_accom(self, accom_id, guest, start_date, end_date):
+        accom = self.search_accom_by_id(accom_id=accom_id)
+        price = accom.cal_price(guest, start_date, end_date)
+        return price
+
+        pass  # call func in Accomodation to cal total price
+
+    def search_user_to_check(self, user_name, phone, email, password, age):
+        for member in self.__member_list:
+            if member.get_phone_num == phone and member.get_user_nane == user_name and member.get_email == email:
+                return "You have an Account, Wanna Login?"
+        try:
+            self.create_account(name=user_name, email=email,
+                                password=password, age=age)
+            return "Success"
+        except:
+            return "Sign up Fail"
+        pass  # search for check if user want to sign up
+
+    def search_coupon_by_user_id(self, user_id):
+        user = self.search_member_by_id(user_id)
+        coupons = user.get_coupons
+        result = self.show_coupon(coupons)
+        return result
+
+    def show_coupon(self, coupons):
+        result = []
+        for cou in coupons:
+            if cou.check_expirat():
+                result.append(cou.get_info())
+        return result
+        # for show all coupon on UI
+        pass
+
+    def create_payment(self, price, period, paymed, booking_id):
+        booking_item = self.search_booking_by_id(booking_id=booking_id)
+        payment = booking_item.create_payment(price, period, paymed)
+        result = self.update_booking_pay(payment)
+        return result
+        pass  # call Booking to create
+
+    def create_payment_med(self, details):
+        details = "".join(i for i in details if i != '"')
+        card_id, user, balance, password = details.split(",")
+        balance = int(balance)
+        user = self.search_member_by_id(user)
+        pay_med = Debit(card_id, user, balance, password)
+        return pay_med
+        # key use
+        # cal member to create and put on Booking after create
+        pass
+
+    def update_booking_payment(self, booking_id, payment):
+        booking = self.search_booking_by_id(booking_id=booking_id)
+        result = booking.update_payment(payment)
+        # to put payment and pay_med into Booking
+        pass
+
+    def update_booking_pay_med(self, booking_id, paymed):
+        booking = self.search_booking_by_id(booking_id=booking_id)
+        result = booking.update_pay_med(paymed)
+        return result
+        pass
+# update
+
     def search_member_by_id(self, id):
         for member in self.get_member_list:
             if id == member.get_user_id:
